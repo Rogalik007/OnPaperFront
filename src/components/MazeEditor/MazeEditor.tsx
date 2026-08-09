@@ -5,6 +5,7 @@ import { useSignalR } from '../../models/SignalRContext.tsx';
 import { Directions } from '../../enums/Directions.tsx';
 import { EditMods } from '../../enums/EditMods.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
+import { clearDraft, loadDraft, saveDraft } from '../../models/MazeDraft.tsx';
 
 const WALL_HIT = 10;
 
@@ -29,10 +30,31 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
 
     (async () => {
       await connection.invoke<number[]>("GetMazeSize")
-        .then(size => setMaze(new Maze(size[0], size[1])))
+        // Недорисованный лабиринт лежит в браузере, поэтому перезагрузка его не теряет
+        .then(size => setMaze(loadDraft(gameId, size[0], size[1]) ?? new Maze(size[0], size[1])))
         .catch(e => console.log(e))
     })()
-  }, [connection]);
+  }, [connection, gameId]);
+
+  // Любое изменение поля сразу уходит в черновик
+  const update = () => {
+    if (maze) {
+      saveDraft(gameId, maze);
+    }
+
+    forceUpdate({});
+  };
+
+  const handleClear = () => {
+    if (!maze) {
+      return;
+    }
+
+    const empty = new Maze(maze.sizeX, maze.sizeY);
+
+    setMaze(empty);
+    saveDraft(gameId, empty);
+  };
 
   const handleSaveMaze = async () => {
     if (!connection || !maze) {
@@ -49,6 +71,7 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
 
     try {
       await connection.invoke<boolean>('SaveMaze', gameId, maze);
+      clearDraft(gameId);
       onSaved(maze);
     } catch (e) {
       setError(hubErrorMessage(e));
@@ -72,7 +95,7 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
               { editMode === EditMods.TREASURE &&
                 <div
                   className="cell-zone"
-                  onClick={ () => { maze.treasure === index ? maze.treasure = null : maze.treasure = index; forceUpdate({}); } }
+                  onClick={ () => { maze.treasure === index ? maze.treasure = null : maze.treasure = index; update(); } }
                 />
               }
               { editMode === EditMods.WALL &&
@@ -81,14 +104,14 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
                     <div
                       className="wall-zone wall-zone-right"
                       style={ { width: WALL_HIT } }
-                      onClick={ () => { maze.addOrRemoveWall(index, Directions.RIGHT); forceUpdate({}); } }
+                      onClick={ () => { maze.addOrRemoveWall(index, Directions.RIGHT); update(); } }
                     />
                   ) }
                   { index < maze.sizeX * (maze.sizeY - 1) && (
                     <div
                       className="wall-zone wall-zone-bottom"
                       style={ { height: WALL_HIT } }
-                      onClick={ () => { maze.addOrRemoveWall(index, Directions.DOWN); forceUpdate({}); } }
+                      onClick={ () => { maze.addOrRemoveWall(index, Directions.DOWN); update(); } }
                     />
                   ) }
                 </>
@@ -104,7 +127,7 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
         Treasure
       </button>
       <div className="buttons">
-        <button type="button" onClick={ () => maze && setMaze(new Maze(maze.sizeX, maze.sizeY)) } disabled={ sending }>
+        <button type="button" onClick={ handleClear } disabled={ sending }>
           Clear
         </button>
         <button type="button" onClick={ handleSaveMaze } disabled={ sending }>

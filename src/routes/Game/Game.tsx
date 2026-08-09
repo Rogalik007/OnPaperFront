@@ -8,6 +8,7 @@ import { useSignalR } from '../../models/SignalRContext.tsx';
 import MazeEditor from '../../components/MazeEditor/MazeEditor.tsx';
 import MazeBoard from '../../components/MazeBoard/MazeBoard.tsx';
 import MazeGrid from '../../components/MazeGrid/MazeGrid.tsx';
+import OpponentLeft from '../../components/OpponentLeft/OpponentLeft.tsx';
 
 interface GameRouteParams extends Record<string, string | undefined> {
   gameId: string;
@@ -20,6 +21,7 @@ interface PlayState {
   turnSeconds: number;
   discoveredWalls: WallHit[];
   youWon: boolean | null;
+  endedByDisconnect: boolean;
 }
 
 function Game() {
@@ -29,6 +31,8 @@ function Game() {
   const [myMaze, setMyMaze] = useState<Maze | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [leftSeconds, setLeftSeconds] = useState<number | null>(null);
+  const [endedByLeave, setEndedByLeave] = useState(false);
   const { connection } = useSignalR();
 
   // Состояние берётся с сервера, поэтому перезагрузка страницы возвращает игрока туда же,
@@ -58,9 +62,12 @@ function Game() {
             turnSeconds: snapshot.secondsLeft,
             discoveredWalls: snapshot.discoveredWalls,
             youWon: snapshot.youWon,
+            endedByDisconnect: snapshot.endedByDisconnect,
           });
         }
 
+        setEndedByLeave(snapshot.endedByDisconnect);
+        setLeftSeconds(snapshot.opponentLeftSeconds);
         setLoading(false);
       })
       .catch(e => {
@@ -73,12 +80,12 @@ function Game() {
     return () => { isCurrent = false; };
   }, [connection, gameId]);
 
-  // Сервер присылает GameStart, когда лабиринты сохранили оба игрока
   useEffect(() => {
     if (!connection) {
       return;
     }
 
+    // Сервер присылает GameStart, когда лабиринты сохранили оба игрока
     const onGameStart = (_size: number[], position: number, yourTurn: boolean, turnSeconds: number) => {
       setPlay({
         position,
@@ -87,12 +94,29 @@ function Game() {
         turnSeconds,
         discoveredWalls: [],
         youWon: null,
+        endedByDisconnect: false,
       });
     };
 
-    connection.on('GameStart', onGameStart);
+    const onOpponentLeft = (seconds: number) => setLeftSeconds(seconds);
+    const onOpponentReturned = () => setLeftSeconds(null);
 
-    return () => connection.off('GameStart', onGameStart);
+    const onGameOver = (_youWon: boolean, byDisconnect: boolean) => {
+      setLeftSeconds(null);
+      setEndedByLeave(byDisconnect);
+    };
+
+    connection.on('GameStart', onGameStart);
+    connection.on('OpponentLeft', onOpponentLeft);
+    connection.on('OpponentReturned', onOpponentReturned);
+    connection.on('GameOver', onGameOver);
+
+    return () => {
+      connection.off('GameStart', onGameStart);
+      connection.off('OpponentLeft', onOpponentLeft);
+      connection.off('OpponentReturned', onOpponentReturned);
+      connection.off('GameOver', onGameOver);
+    };
   }, [connection]);
 
   if (!gameId) {
@@ -112,18 +136,34 @@ function Game() {
     return <div className="game-message"><p>Loading...</p></div>;
   }
 
+  const banner = leftSeconds !== null && <OpponentLeft gameId={ gameId } seconds={ leftSeconds } />;
+
   if (play && myMaze) {
     return (
-      <MazeBoard
-        gameId={ gameId }
-        myMaze={ myMaze }
-        position={ play.position }
-        opponentPosition={ play.opponentPosition }
-        yourTurn={ play.yourTurn }
-        turnSeconds={ play.turnSeconds }
-        discoveredWalls={ play.discoveredWalls }
-        youWon={ play.youWon }
-      />
+      <>
+        { banner }
+        <MazeBoard
+          gameId={ gameId }
+          myMaze={ myMaze }
+          position={ play.position }
+          opponentPosition={ play.opponentPosition }
+          yourTurn={ play.yourTurn }
+          turnSeconds={ play.turnSeconds }
+          discoveredWalls={ play.discoveredWalls }
+          youWon={ play.youWon }
+          endedByDisconnect={ play.endedByDisconnect }
+        />
+      </>
+    );
+  }
+
+  // Партия оборвалась до начала: рисовать лабиринт уже некуда
+  if (endedByLeave) {
+    return (
+      <div className="game-message">
+        <h2>Game over</h2>
+        <p>Opponent left the game.</p>
+      </div>
     );
   }
 
@@ -131,13 +171,19 @@ function Game() {
   if (myMaze) {
     return (
       <div className="game-message">
+        { banner }
         <h2>Waiting for opponent...</h2>
         <MazeGrid maze={ myMaze } showTreasure />
       </div>
     );
   }
 
-  return <MazeEditor gameId={ gameId } onSaved={ setMyMaze } />;
+  return (
+    <>
+      { banner }
+      <MazeEditor gameId={ gameId } onSaved={ setMyMaze } />
+    </>
+  );
 }
 
 export default Game;

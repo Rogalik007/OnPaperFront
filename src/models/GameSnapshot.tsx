@@ -25,6 +25,8 @@ export interface GameSnapshot {
   secondsLeft: number;
   discoveredWalls: WallHit[];
   youWon: boolean | null;
+  endedByDisconnect: boolean;
+  opponentLeftSeconds: number | null;
 }
 
 export function toMaze(model: MazeModel): Maze {

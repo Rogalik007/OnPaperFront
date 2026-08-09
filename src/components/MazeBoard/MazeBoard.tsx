@@ -16,6 +16,7 @@ interface MazeBoardProps {
   turnSeconds: number;
   discoveredWalls: WallHit[];
   youWon: boolean | null;
+  endedByDisconnect: boolean;
 }
 
 const KEY_DIRECTIONS: Record<string, Directions> = {
@@ -26,7 +27,8 @@ const KEY_DIRECTIONS: Record<string, Directions> = {
 };
 
 export default function MazeBoard(
-  { gameId, myMaze, position, opponentPosition, yourTurn, turnSeconds, discoveredWalls, youWon }: MazeBoardProps
+  { gameId, myMaze, position, opponentPosition, yourTurn, turnSeconds, discoveredWalls, youWon,
+    endedByDisconnect }: MazeBoardProps
 ) {
   // Чужой лабиринт: известны только те стенки, в которые игрок уже упирался
   const [enemyMaze] = useState(() => {
@@ -39,6 +41,7 @@ export default function MazeBoard(
   const [myTurn, setMyTurn] = useState(yourTurn);
   const [secondsLeft, setSecondsLeft] = useState(turnSeconds);
   const [win, setWin] = useState<boolean | null>(youWon);
+  const [byLeave, setByLeave] = useState(endedByDisconnect);
   const [error, setError] = useState<string | null>(null);
   const [turnNumber, setTurnNumber] = useState(0);
   const { connection } = useSignalR();
@@ -70,8 +73,9 @@ export default function MazeBoard(
       setTurnNumber(number => number + 1);
     };
 
-    const onGameOver = (isWinner: boolean) => {
+    const onGameOver = (isWinner: boolean, byDisconnect: boolean) => {
       setWin(isWinner);
+      setByLeave(byDisconnect);
       setMyTurn(false);
     };
 
@@ -144,9 +148,13 @@ export default function MazeBoard(
     return () => clearInterval(timer);
   }, [connection, gameId, win, turnNumber]);
 
+  const finished = byLeave
+    ? (win ? 'Opponent left the game' : 'You left the game')
+    : (win ? 'You found the treasure!' : 'Opponent found the treasure');
+
   const status = win === null
     ? (myTurn ? `Your turn - use arrow keys (${ secondsLeft }s)` : `Opponent is moving... (${ secondsLeft }s)`)
-    : (win ? 'You found the treasure!' : 'Opponent found the treasure');
+    : finished;
 
   return (
     <div className="board-layout">
