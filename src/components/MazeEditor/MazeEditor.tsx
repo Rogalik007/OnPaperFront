@@ -4,12 +4,19 @@ import { Maze } from '../../models/Maze.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { Directions } from '../../enums/Directions.tsx';
 import { EditMods } from '../../enums/EditMods.tsx';
+import { hubErrorMessage } from '../../models/HubError.tsx';
 
 const WALL_HIT = 10;
 
-export default function MazeEditor() {
+interface MazeEditorProps {
+  gameId: string;
+  onSaved: (maze: Maze) => void;
+}
+
+export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
   const [maze, setMaze] = useState<Maze | null>(null);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(EditMods.WALL);
   const { connection } = useSignalR();
   const [, forceUpdate] = useState({});
@@ -28,12 +35,25 @@ export default function MazeEditor() {
   }, [connection]);
 
   const handleSaveMaze = async () => {
-    if (!connection) {
+    if (!connection || !maze) {
+      return;
+    }
+
+    if (maze.treasure === null) {
+      setError('Place the treasure first');
       return;
     }
 
     setSending(true);
-    await connection.invoke('SaveMaze', maze);
+    setError(null);
+
+    try {
+      await connection.invoke<boolean>('SaveMaze', gameId, maze);
+      onSaved(maze);
+    } catch (e) {
+      setError(hubErrorMessage(e));
+      setSending(false);
+    }
   };
 
   return (
@@ -91,6 +111,7 @@ export default function MazeEditor() {
           { sending ? 'Sending...' : 'Save maze' }
         </button>
       </div>
+      { error && <div className="error">{ error }</div> }
     </div>
   );
 }

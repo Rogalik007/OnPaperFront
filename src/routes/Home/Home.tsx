@@ -4,6 +4,7 @@ import { API_URL } from '../../../config.js';
 import './Home.css';
 import Search from '../../components/Search/Search.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
+import { getToken, getUserId } from '../../models/Auth.tsx';
 
 function Home() {
   const [searching, setSearching] = useState<boolean>(false);
@@ -13,8 +14,8 @@ function Home() {
 
   useEffect(() => {
     async function fetchUser() {
-      const id = localStorage.getItem('id');
-      const token = localStorage.getItem('token');
+      const id = getUserId();
+      const token = getToken();
 
       if (id) {
         try {
@@ -40,19 +41,35 @@ function Home() {
     fetchUser();
   }, []);
 
-  const handleSearch = () => {
+  // Подписка живёт вместе с соединением, а не вешается заново на каждый клик по Play
+  useEffect(() => {
+    if (!connection) {
+      return;
+    }
+
+    const onGameFound = (gameId: string, opponentId: string) => {
+      console.log(`Game found! Game ID: ${gameId}, Opponent: ${opponentId}`);
+      navigate(`/game/${gameId}`);
+    };
+
+    connection.on('GameFound', onGameFound);
+
+    return () => connection.off('GameFound', onGameFound);
+  }, [connection, navigate]);
+
+  const handleSearch = async () => {
     if (!connection) {
       return;
     }
 
     setSearching(true);
 
-    connection.on('GameFound', (gameId: string, opponentId: string) => {
-      console.log(`Game found! Game ID: ${gameId}, Opponent: ${opponentId}`);
-      navigate(`/game/${gameId}`);
-    });
-
-    connection.invoke('FindGame');
+    try {
+      await connection.invoke('GameSearch');
+    } catch (e) {
+      console.error(e);
+      setSearching(false);
+    }
   };
 
   const handleLogin = () => {
@@ -66,9 +83,7 @@ function Home() {
       return;
     }
 
-    connection.off("GameFound");
-
-    connection.send("CancelSearch");
+    connection.send('GameCancelSearch').catch(console.error);
   };
 
   return (
@@ -78,8 +93,8 @@ function Home() {
         {user ? (
           <>
             <p className="username">Signed in as {user}</p>
-            <button type="button" onClick={handleSearch}>
-              Play
+            <button type="button" onClick={handleSearch} disabled={!connection}>
+              { connection ? 'Play' : 'Connecting...' }
             </button>
           </>
         ) : null}

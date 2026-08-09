@@ -1,46 +1,18 @@
-.battlefield {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 64px;
-  padding: 2rem 0;
-  flex-wrap: wrap;
-}
-
-.board {
+.game-message {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  padding: 2rem 0;
 }
 
-.board-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
+.game-message h2 {
+  margin: 0;
+  font-size: 18px;
 }
 
-.board-grid {
-  display: grid;
-  grid-template-columns: repeat(10, 34px);
-  grid-template-rows: repeat(10, 34px);
-  background: var(--surface-1);
-  border: 3px solid #ededed;
-}
-
-.board-cell {
-  width: 34px;
-  height: 34px;
-  box-sizing: border-box;
-  background: var(--surface-2);
-  border-right: 0.5px solid #414141;
-  border-bottom: 0.5px solid #414141;
-}
-
-.board-cell--wall-right {
-  border-right: 3px solid #ededed;
-}
-
-.board-cell--wall-bottom {
-  border-bottom: 3px solid #ededed;
+.game-message p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
 }

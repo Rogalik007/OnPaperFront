@@ -1,6 +1,7 @@
 import { useState, SubmitEvent } from 'react'
 import { useNavigate, Link } from "react-router";
 import { API_URL } from '../../../config.js'
+import { saveAuth } from '../../models/Auth.tsx'
 import './Auth.css'
 
 function Register() {
@@ -44,8 +45,7 @@ function Register() {
       const data = await response.json();
       
       if (response.ok) {
-        localStorage.setItem("id", data.id);
-        localStorage.setItem("token", data.token);
+        saveAuth(data.id, data.token);
         navigate("/");
       } else {
         setError(data || "An unknown error occurred. Please try again.");
