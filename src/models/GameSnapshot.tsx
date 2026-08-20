@@ -1,5 +1,6 @@
 import { Maze } from './Maze.tsx';
 import { Directions } from '../enums/Directions.tsx';
+import { ChatMessage } from './Chat.tsx';
 
 export interface WallHit {
   cell: number;
@@ -27,6 +28,7 @@ export interface GameSnapshot {
   youWon: boolean | null;
   endedByDisconnect: boolean;
   opponentLeftSeconds: number | null;
+  chatMessages: ChatMessage[];
 }
 
 export function toMaze(model: MazeModel): Maze {

@@ -9,6 +9,8 @@ import MazeEditor from '../../components/MazeEditor/MazeEditor.tsx';
 import MazeBoard from '../../components/MazeBoard/MazeBoard.tsx';
 import MazeGrid from '../../components/MazeGrid/MazeGrid.tsx';
 import OpponentLeft from '../../components/OpponentLeft/OpponentLeft.tsx';
+import Chat from '../../components/Chat/Chat.tsx';
+import { ChatMessage } from '../../models/Chat.tsx';
 
 interface GameRouteParams extends Record<string, string | undefined> {
   gameId: string;
@@ -33,6 +35,7 @@ function Game() {
   const [error, setError] = useState<string | null>(null);
   const [leftSeconds, setLeftSeconds] = useState<number | null>(null);
   const [endedByLeave, setEndedByLeave] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const { connection } = useSignalR();
 
   // Состояние берётся с сервера, поэтому перезагрузка страницы возвращает игрока туда же,
@@ -68,6 +71,7 @@ function Game() {
 
         setEndedByLeave(snapshot.endedByDisconnect);
         setLeftSeconds(snapshot.opponentLeftSeconds);
+        setChatMessages(snapshot.chatMessages);
         setLoading(false);
       })
       .catch(e => {
@@ -137,6 +141,7 @@ function Game() {
   }
 
   const banner = leftSeconds !== null && <OpponentLeft gameId={ gameId } seconds={ leftSeconds } />;
+  const chat = <Chat gameId={ gameId } initialMessages={ chatMessages } />;
 
   if (play && myMaze) {
     return (
@@ -153,6 +158,7 @@ function Game() {
           youWon={ play.youWon }
           endedByDisconnect={ play.endedByDisconnect }
         />
+        { chat }
       </>
     );
   }
@@ -174,6 +180,7 @@ function Game() {
         { banner }
         <h2>Waiting for opponent...</h2>
         <MazeGrid maze={ myMaze } showTreasure />
+        { chat }
       </div>
     );
   }
@@ -182,6 +189,7 @@ function Game() {
     <>
       { banner }
       <MazeEditor gameId={ gameId } onSaved={ setMyMaze } />
+      { chat }
     </>
   );
 }
