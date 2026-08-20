@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router';
 import { API_URL } from '../../../config.js';
 import './Home.css';
 import Search from '../../components/Search/Search.tsx';
+import Leaderboard from '../../components/Leaderboard/Leaderboard.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { getToken, getUserId } from '../../models/Auth.tsx';
 
@@ -105,6 +106,7 @@ function Home() {
           No account? <Link to="/register">Sign up</Link>
         </p>
       </div>
+      <Leaderboard />
       {searching && <Search handleCancel={ handleCancel } />}
     </>
   );

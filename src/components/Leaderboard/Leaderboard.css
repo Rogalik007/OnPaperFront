@@ -1,0 +1,55 @@
+.leaderboard {
+  width: 280px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.leaderboard h3 {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.leaderboard table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.leaderboard th,
+.leaderboard td {
+  padding: 6px 4px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.leaderboard th {
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 10px;
+}
+
+.leaderboard td:first-child,
+.leaderboard th:first-child {
+  width: 24px;
+  color: var(--muted);
+}
+
+.leaderboard td:last-child,
+.leaderboard th:last-child {
+  width: 56px;
+  text-align: right;
+}
+
+.leaderboard td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
