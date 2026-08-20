@@ -4,6 +4,15 @@
   --paper: #131313;
   --muted: #767676;
   --error: #ff6b6b;
+
+  /* Лабиринт: сетка рисуется поверх тёмного фона, поэтому её палитра светлее основной */
+  --wall-bg: #686868;
+  --wall: #ffffff;
+  --treasure: chartreuse;
+  --player: #4d9bff;
+  --player-opponent: #ff8a4d;
+  --hover: rgba(100, 150, 255, 0.35);
+  --hover-strong: rgba(100, 150, 255, 0.6);
 }
 
 body {
@@ -33,4 +42,59 @@ button {
 button:hover {
   background: var(--paper);
   color: var(--ink);
+}
+
+/* Общая раскладка форм: логин, регистрация и статус на главной делят один и тот же вид */
+form {
+  width: 280px;
+  padding: 32px 0;
+}
+
+h1 {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 24px;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+input {
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: 20px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  font: inherit;
+  color: var(--ink);
+}
+
+input:focus {
+  outline: none;
+  border-bottom-width: 2px;
+}
+
+p {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.error {
+  color: var(--error);
+  font-size: 12px;
+  margin: -4px 0 16px;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
 }

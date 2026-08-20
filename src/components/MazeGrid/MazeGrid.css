@@ -6,8 +6,8 @@
   grid-template-columns: repeat(var(--sizeX), 1fr);
   grid-template-rows: repeat(var(--sizeY), 1fr);
   gap: 1px;
-  background: #686868;
-  border: 3px solid #ffffff;
+  background: var(--wall-bg);
+  border: 3px solid var(--wall);
 }
 
 .grid-cell {
@@ -19,7 +19,7 @@
 
 .grid .wall {
   position: absolute;
-  background: #ffffff;
+  background: var(--wall);
   pointer-events: none;
   z-index: 1;
 }
@@ -42,7 +42,7 @@
 .grid .treasure {
   position: absolute;
   inset: 0;
-  background-color: chartreuse;
+  background-color: var(--treasure);
   pointer-events: none;
 }
 
@@ -54,10 +54,10 @@
   height: 14px;
   margin: -7px 0 0 -7px;
   border-radius: 50%;
-  background: #4d9bff;
+  background: var(--player);
   z-index: 2;
 }
 
 .player-opponent {
-  background: #ff8a4d;
+  background: var(--player-opponent);
 }

@@ -120,12 +120,22 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
           ))}
         </div>
       }
-      <button type="button" onClick={ () => setEditMode(EditMods.WALL) }>
-        Wall
-      </button>
-      <button type="button" onClick={ () => setEditMode(EditMods.TREASURE) }>
-        Treasure
-      </button>
+      <div className="mode-toggle">
+        <button
+          type="button"
+          className={ editMode === EditMods.WALL ? 'active' : undefined }
+          onClick={ () => setEditMode(EditMods.WALL) }
+        >
+          Wall
+        </button>
+        <button
+          type="button"
+          className={ editMode === EditMods.TREASURE ? 'active' : undefined }
+          onClick={ () => setEditMode(EditMods.TREASURE) }
+        >
+          Treasure
+        </button>
+      </div>
       <div className="buttons">
         <button type="button" onClick={ handleClear } disabled={ sending }>
           Clear

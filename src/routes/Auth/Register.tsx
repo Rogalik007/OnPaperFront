@@ -2,7 +2,6 @@ import { useState, SubmitEvent } from 'react'
 import { useNavigate, Link } from "react-router";
 import { API_URL } from '../../../config.js'
 import { saveAuth } from '../../models/Auth.tsx'
-import './Auth.css'
 
 function Register() {
   const [email, setEmail] = useState("");

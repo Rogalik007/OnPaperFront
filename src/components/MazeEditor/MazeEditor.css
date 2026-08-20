@@ -16,8 +16,8 @@
   grid-template-columns: repeat(var(--sizeX), 1fr);
   grid-template-rows: repeat(var(--sizeY), 1fr);
   gap: 1px;
-  background: #686868;
-  border: 3px solid #ffffff;
+  background: var(--wall-bg);
+  border: 3px solid var(--wall);
 }
 
 .cell {
@@ -29,7 +29,7 @@
 
 .wall {
   position: absolute;
-  background: #ffffff;
+  background: var(--wall);
   pointer-events: none;
   z-index: 1;
 }
@@ -69,11 +69,11 @@
 }
 
 .wall-zone:hover {
-  background: rgba(100, 150, 255, 0.35);
+  background: var(--hover);
 }
 
 .wall-zone:active {
-  background: rgba(100, 150, 255, 0.6);
+  background: var(--hover-strong);
 }
 
 .cell-zone {
@@ -85,12 +85,12 @@
 }
 
 .cell-zone:hover {
-  background: rgba(100, 150, 255, 0.35);
+  background: var(--hover);
 }
 
 .treasure {
   position: absolute;
-  background-color: chartreuse;
+  background-color: var(--treasure);
   height: 100%;
   width: 100%;
   z-index: 1;
@@ -103,20 +103,26 @@
   font-size: 12px;
 }
 
-.maze-editor-actions {
+/* Переключатель режима рисования и панель действий - два ряда кнопок во всю ширину редактора */
+.mode-toggle,
+.buttons {
   display: flex;
   gap: 12px;
+  width: 100%;
 }
 
-.maze-editor-actions button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--border-strong);
-  background: #ffffff;
-  cursor: pointer;
+.mode-toggle button,
+.buttons button {
+  flex: 1;
+  margin-top: 0;
 }
 
-.maze-editor-actions button:disabled {
+.mode-toggle button.active {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.buttons button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
