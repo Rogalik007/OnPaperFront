@@ -9,6 +9,7 @@ import { getToken, getUserId } from '../../models/Auth.tsx';
 
 function Home() {
   const [searching, setSearching] = useState<boolean>(false);
+  const [racing, setRacing] = useState<boolean>(false);
   const [user, setUser] = useState<string | null>(null);
   const { connection } = useSignalR();
   const navigate = useNavigate();
@@ -53,9 +54,19 @@ function Home() {
       navigate(`/game/${gameId}`);
     };
 
-    connection.on('GameFound', onGameFound);
+    const onRaceFound = (gameId: string) => {
+      console.log(`Race found! Game ID: ${gameId}`);
+      setRacing(false);
+      navigate(`/race/${gameId}`);
+    };
 
-    return () => connection.off('GameFound', onGameFound);
+    connection.on('GameFound', onGameFound);
+    connection.on('RaceFound', onRaceFound);
+
+    return () => {
+      connection.off('GameFound', onGameFound);
+      connection.off('RaceFound', onRaceFound);
+    };
   }, [connection, navigate]);
 
   const handleSearch = async () => {
@@ -73,6 +84,21 @@ function Home() {
     }
   };
 
+  const handleRaceSearch = async () => {
+    if (!connection) {
+      return;
+    }
+
+    setRacing(true);
+
+    try {
+      await connection.invoke('RaceSearch');
+    } catch (e) {
+      console.error(e);
+      setRacing(false);
+    }
+  };
+
   const handleLogin = () => {
     navigate('/login');
   };
@@ -87,6 +113,16 @@ function Home() {
     connection.send('GameCancelSearch').catch(console.error);
   };
 
+  const handleRaceCancel = () => {
+    setRacing(false);
+
+    if (!connection) {
+      return;
+    }
+
+    connection.send('RaceCancelSearch').catch(console.error);
+  };
+
   return (
     <>
       <div className="home">
@@ -94,8 +130,11 @@ function Home() {
         {user ? (
           <>
             <p className="username">Signed in as {user}</p>
-            <button type="button" onClick={handleSearch} disabled={!connection}>
+            <button type="button" onClick={handleSearch} disabled={!connection || racing}>
               { connection ? 'Play' : 'Connecting...' }
+            </button>
+            <button type="button" onClick={handleRaceSearch} disabled={!connection || searching}>
+              { connection ? 'Play Maze Race' : 'Connecting...' }
             </button>
           </>
         ) : null}
@@ -108,6 +147,12 @@ function Home() {
       </div>
       <Leaderboard />
       {searching && <Search handleCancel={ handleCancel } />}
+      {racing && (
+        <Search
+          handleCancel={ handleRaceCancel }
+          message="Searching for maze race players..."
+        />
+      )}
     </>
   );
 }
