@@ -92,6 +92,27 @@ export default function MazeBoard(
     };
   }, [connection, enemyMaze]);
 
+  // Общий обработчик хода: дергается и со стрелок клавиатуры, и с кнопок на экране -
+  // на телефоне клавиатуры нет, поэтому кнопки для него единственный способ ходить.
+  const move = (direction: Directions) => {
+    if (!connection || win !== null) {
+      return;
+    }
+
+    if (!myTurn) {
+      setError('Not your turn');
+      return;
+    }
+
+    setMyTurn(false);
+    setError(null);
+
+    connection.invoke('Move', gameId, direction).catch(e => {
+      setError(hubErrorMessage(e));
+      setMyTurn(true);
+    });
+  };
+
   // Слушатель висит всегда, пока партия идёт: очередь ходов - дело сервера,
   // и клиентское состояние не должно уметь заблокировать управление.
   useEffect(() => {
@@ -106,20 +127,15 @@ export default function MazeBoard(
         return;
       }
 
-      e.preventDefault();
+      // Стрелки в чате должны просто двигать курсор по тексту, а не ходить по лабиринту
+      const target = e.target as HTMLElement | null;
 
-      if (!myTurn) {
-        setError('Not your turn');
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         return;
       }
 
-      setMyTurn(false);
-      setError(null);
-
-      connection.invoke('Move', gameId, direction).catch(e => {
-        setError(hubErrorMessage(e));
-        setMyTurn(true);
-      });
+      e.preventDefault();
+      move(direction);
     };
 
     window.addEventListener('keydown', onKeyDown);
@@ -153,7 +169,7 @@ export default function MazeBoard(
     : (win ? 'You found the treasure!' : 'Opponent found the treasure');
 
   const status = win === null
-    ? (myTurn ? `Your turn - use arrow keys (${ secondsLeft }s)` : `Opponent is moving... (${ secondsLeft }s)`)
+    ? (myTurn ? `Your turn (${ secondsLeft }s)` : `Opponent is moving... (${ secondsLeft }s)`)
     : finished;
 
   return (
@@ -170,6 +186,46 @@ export default function MazeBoard(
           <MazeGrid maze={ myMaze } opponent={ enemyCell } showTreasure />
         </div>
       </div>
+      { win === null &&
+        <div className="controls">
+          <button
+            type="button"
+            className="control control-up"
+            aria-label="Move up"
+            disabled={ !connection }
+            onClick={ () => move(Directions.UP) }
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            className="control control-left"
+            aria-label="Move left"
+            disabled={ !connection }
+            onClick={ () => move(Directions.LEFT) }
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            className="control control-down"
+            aria-label="Move down"
+            disabled={ !connection }
+            onClick={ () => move(Directions.DOWN) }
+          >
+            ↓
+          </button>
+          <button
+            type="button"
+            className="control control-right"
+            aria-label="Move right"
+            disabled={ !connection }
+            onClick={ () => move(Directions.RIGHT) }
+          >
+            →
+          </button>
+        </div>
+      }
     </div>
   );
 }

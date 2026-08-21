@@ -8,6 +8,10 @@
   gap: 1px;
   background: var(--wall-bg);
   border: 3px solid var(--wall);
+  /* Клетки фиксированной ширины: если поле больше, чем помещается на экране,
+     пусть скроллится само поле, а не вся страница вбок */
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .grid-cell {

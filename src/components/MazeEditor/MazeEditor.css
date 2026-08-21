@@ -6,6 +6,7 @@
   padding: 0;
   margin: 0;
   border: 0;
+  max-width: 100%;
 }
 
 /* Линии сетки - это фон контейнера, проступающий в gap между клетками.
@@ -18,6 +19,10 @@
   gap: 1px;
   background: var(--wall-bg);
   border: 3px solid var(--wall);
+  /* Клетки фиксированной ширины: если поле больше, чем помещается на экране,
+     пусть скроллится само поле, а не вся страница вбок */
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .cell {
@@ -68,10 +73,6 @@
   width: 100%;
 }
 
-.wall-zone:hover {
-  background: var(--hover);
-}
-
 .wall-zone:active {
   background: var(--hover-strong);
 }
@@ -84,8 +85,17 @@
   pointer-events: auto;
 }
 
-.cell-zone:hover {
-  background: var(--hover);
+/* На тач-устройствах нет наведения: тап по стенке/клетке сразу ставит объект.
+   ":hover" на телефоне срабатывает по тапу и залипает до следующего касания,
+   поэтому подсветку оставляем только там, где есть настоящая мышь */
+@media (hover: hover) and (pointer: fine) {
+  .wall-zone:hover {
+    background: var(--hover);
+  }
+
+  .cell-zone:hover {
+    background: var(--hover);
+  }
 }
 
 .treasure {
