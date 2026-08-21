@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Локальный dev-сертификат HTTPS - содержит приватный ключ
+certs/
