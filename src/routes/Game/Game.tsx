@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams } from "react-router";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate } from "react-router";
 import './Game.css';
 import { Maze } from '../../models/Maze.tsx';
 import { GameSnapshot, WallHit, toMaze } from '../../models/GameSnapshot.tsx';
@@ -26,8 +26,13 @@ interface PlayState {
   endedByDisconnect: boolean;
 }
 
+// Сколько ждём после конца партии, прежде чем увести обоих игроков в меню -
+// столько же, сколько сервер ждёт на CheckOpponentLeft, чтобы результат успели прочитать
+const RETURN_TO_MENU_SECONDS = 5;
+
 function Game() {
   const { gameId } = useParams<GameRouteParams>();
+  const navigate = useNavigate();
   const [play, setPlay] = useState<PlayState | null>(null);
   // Свой лабиринт нужен и после редактора: по нему ходит противник
   const [myMaze, setMyMaze] = useState<Maze | null>(null);
@@ -36,20 +41,20 @@ function Game() {
   const [leftSeconds, setLeftSeconds] = useState<number | null>(null);
   const [endedByLeave, setEndedByLeave] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [returnSeconds, setReturnSeconds] = useState<number | null>(null);
   const { connection } = useSignalR();
+  const isCurrentRef = useRef(true);
 
   // Состояние берётся с сервера, поэтому перезагрузка страницы возвращает игрока туда же,
   // где он был. Здесь же отсеиваются чужие и несуществующие игры.
-  useEffect(() => {
+  const syncGameState = useCallback(() => {
     if (!connection || !gameId) {
       return;
     }
 
-    let isCurrent = true;
-
     connection.invoke<GameSnapshot>('GetGameState', gameId)
       .then(snapshot => {
-        if (!isCurrent) {
+        if (!isCurrentRef.current) {
           return;
         }
 
@@ -73,16 +78,43 @@ function Game() {
         setLeftSeconds(snapshot.opponentLeftSeconds);
         setChatMessages(snapshot.chatMessages);
         setLoading(false);
+
+        // Партия уже закончилась (в том числе если игрок перезагрузил страницу после конца) -
+        // обратный отсчёт до меню запускаем и в этом случае, а не только по событию GameOver
+        if (snapshot.youWon !== null || snapshot.endedByDisconnect) {
+          setReturnSeconds(seconds => seconds ?? RETURN_TO_MENU_SECONDS);
+        }
       })
       .catch(e => {
-        if (isCurrent) {
-          setError(hubErrorMessage(e));
-          setLoading(false);
+        if (!isCurrentRef.current) {
+          return;
         }
-      });
 
-    return () => { isCurrent = false; };
+        setError(hubErrorMessage(e));
+        setLoading(false);
+      });
   }, [connection, gameId]);
+
+  useEffect(() => {
+    if (!connection) {
+      return;
+    }
+
+    isCurrentRef.current = true;
+    syncGameState();
+
+    // Один физический обработчик onreconnected живёт всё время соединения (SignalR не даёт
+    // его снять), поэтому конкретный экран игры только подставляет себя в этот слот
+    connection.onGameReconnected = syncGameState;
+
+    return () => {
+      isCurrentRef.current = false;
+
+      if (connection.onGameReconnected === syncGameState) {
+        connection.onGameReconnected = undefined;
+      }
+    };
+  }, [connection, syncGameState]);
 
   useEffect(() => {
     if (!connection) {
@@ -108,6 +140,7 @@ function Game() {
     const onGameOver = (_youWon: boolean, byDisconnect: boolean) => {
       setLeftSeconds(null);
       setEndedByLeave(byDisconnect);
+      setReturnSeconds(seconds => seconds ?? RETURN_TO_MENU_SECONDS);
     };
 
     connection.on('GameStart', onGameStart);
@@ -122,6 +155,30 @@ function Game() {
       connection.off('GameOver', onGameOver);
     };
   }, [connection]);
+
+  // Партия закончилась - через несколько секунд уводим обоих игроков обратно в меню
+  useEffect(() => {
+    if (returnSeconds === null) {
+      return;
+    }
+
+    if (returnSeconds <= 0) {
+      navigate('/');
+      return;
+    }
+
+    const timer = setTimeout(() => setReturnSeconds(returnSeconds - 1), 1000);
+
+    return () => clearTimeout(timer);
+  }, [returnSeconds, navigate]);
+
+  const handleExit = () => {
+    if (connection && gameId) {
+      connection.invoke('LeaveGame', gameId).catch(console.error);
+    }
+
+    navigate('/');
+  };
 
   if (!gameId) {
     return null;
@@ -140,12 +197,21 @@ function Game() {
     return <div className="game-message"><p>Loading...</p></div>;
   }
 
+  const exitButton = (
+    <button type="button" className="exit-button" onClick={ handleExit }>
+      Exit to menu
+    </button>
+  );
+
   const banner = leftSeconds !== null && <OpponentLeft gameId={ gameId } seconds={ leftSeconds } />;
+  const returnNotice = returnSeconds !== null &&
+    <p className="return-to-menu">Returning to menu in { returnSeconds }s...</p>;
   const chat = <Chat gameId={ gameId } initialMessages={ chatMessages } />;
 
   if (play && myMaze) {
     return (
       <>
+        { exitButton }
         { banner }
         <MazeBoard
           gameId={ gameId }
@@ -158,6 +224,7 @@ function Game() {
           youWon={ play.youWon }
           endedByDisconnect={ play.endedByDisconnect }
         />
+        { returnNotice }
         { chat }
       </>
     );
@@ -167,8 +234,10 @@ function Game() {
   if (endedByLeave) {
     return (
       <div className="game-message">
+        { exitButton }
         <h2>Game over</h2>
         <p>Opponent left the game.</p>
+        { returnNotice }
       </div>
     );
   }
@@ -177,6 +246,7 @@ function Game() {
   if (myMaze) {
     return (
       <div className="game-message">
+        { exitButton }
         { banner }
         <h2>Waiting for opponent...</h2>
         <MazeGrid maze={ myMaze } showTreasure />
@@ -187,6 +257,7 @@ function Game() {
 
   return (
     <>
+      { exitButton }
       { banner }
       <MazeEditor gameId={ gameId } onSaved={ setMyMaze } />
       { chat }
