@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from "react-router";
 import './Game.css';
 import { Maze } from '../../models/Maze.tsx';
-import { GameSnapshot, WallHit, toMaze } from '../../models/GameSnapshot.tsx';
+import { GameSnapshot, MineHit, WallHit, toMaze } from '../../models/GameSnapshot.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import MazeEditor from '../../components/MazeEditor/MazeEditor.tsx';
@@ -22,6 +22,7 @@ interface PlayState {
   yourTurn: boolean;
   turnSeconds: number;
   discoveredWalls: WallHit[];
+  discoveredMines: MineHit[];
   youWon: boolean | null;
   endedByDisconnect: boolean;
 }
@@ -41,6 +42,7 @@ function Game() {
   const [leftSeconds, setLeftSeconds] = useState<number | null>(null);
   const [endedByLeave, setEndedByLeave] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [opponentNickname, setOpponentNickname] = useState<string | null>(null);
   const [returnSeconds, setReturnSeconds] = useState<number | null>(null);
   const { connection } = useSignalR();
   const isCurrentRef = useRef(true);
@@ -69,12 +71,14 @@ function Game() {
             yourTurn: snapshot.yourTurn,
             turnSeconds: snapshot.secondsLeft,
             discoveredWalls: snapshot.discoveredWalls,
+            discoveredMines: snapshot.discoveredMines,
             youWon: snapshot.youWon,
             endedByDisconnect: snapshot.endedByDisconnect,
           });
         }
 
         setEndedByLeave(snapshot.endedByDisconnect);
+        setOpponentNickname(snapshot.opponentNickname);
         setLeftSeconds(snapshot.opponentLeftSeconds);
         setChatMessages(snapshot.chatMessages);
         setLoading(false);
@@ -129,6 +133,7 @@ function Game() {
         yourTurn,
         turnSeconds,
         discoveredWalls: [],
+        discoveredMines: [],
         youWon: null,
         endedByDisconnect: false,
       });
@@ -203,6 +208,8 @@ function Game() {
     </button>
   );
 
+  const opponentLabel = opponentNickname &&
+    <p className="opponent-label">Playing against { opponentNickname }</p>;
   const banner = leftSeconds !== null && <OpponentLeft gameId={ gameId } seconds={ leftSeconds } />;
   const returnNotice = returnSeconds !== null &&
     <p className="return-to-menu">Returning to menu in { returnSeconds }s...</p>;
@@ -212,6 +219,7 @@ function Game() {
     return (
       <>
         { exitButton }
+        { opponentLabel }
         { banner }
         <MazeBoard
           gameId={ gameId }
@@ -221,6 +229,7 @@ function Game() {
           yourTurn={ play.yourTurn }
           turnSeconds={ play.turnSeconds }
           discoveredWalls={ play.discoveredWalls }
+          discoveredMines={ play.discoveredMines }
           youWon={ play.youWon }
           endedByDisconnect={ play.endedByDisconnect }
         />
@@ -235,6 +244,7 @@ function Game() {
     return (
       <div className="game-message">
         { exitButton }
+        { opponentLabel }
         <h2>Game over</h2>
         <p>Opponent left the game.</p>
         { returnNotice }
@@ -247,6 +257,7 @@ function Game() {
     return (
       <div className="game-message">
         { exitButton }
+        { opponentLabel }
         { banner }
         <h2>Waiting for opponent...</h2>
         <MazeGrid maze={ myMaze } showTreasure />
@@ -258,6 +269,7 @@ function Game() {
   return (
     <>
       { exitButton }
+      { opponentLabel }
       { banner }
       <MazeEditor gameId={ gameId } onSaved={ setMyMaze } />
       { chat }

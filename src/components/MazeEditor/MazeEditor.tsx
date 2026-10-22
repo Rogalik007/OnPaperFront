@@ -8,6 +8,9 @@ import { hubErrorMessage } from '../../models/HubError.tsx';
 import { clearDraft, loadDraft, saveDraft } from '../../models/MazeDraft.tsx';
 
 const WALL_HIT = 10;
+const REQUIRED_MINES = 2;
+// Противник начинает с этой клетки - клад и мины на ней сервер не примет
+const START_CELL = 0;
 
 interface MazeEditorProps {
   gameId: string;
@@ -45,6 +48,15 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
     forceUpdate({});
   };
 
+  const isStartCell = (index: number) => {
+    if (index !== START_CELL) {
+      return false;
+    }
+
+    setError("Treasure and mines can't be placed on the start cell");
+    return true;
+  };
+
   const handleClear = () => {
     if (!maze) {
       return;
@@ -63,6 +75,16 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
 
     if (maze.treasure === null) {
       setError('Place the treasure first');
+      return;
+    }
+
+    if (maze.mines.length !== REQUIRED_MINES) {
+      setError(`Place ${ REQUIRED_MINES } mines`);
+      return;
+    }
+
+    if (maze.superMine === null) {
+      setError('Place the supermine');
       return;
     }
 
@@ -90,12 +112,40 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
               className="cell"
             >
               { maze.treasure === index && <div className="treasure" /> }
+              { maze.mines.includes(index) && <div className="mine">М</div> }
+              { maze.superMine === index && <div className="supermine">С</div> }
               { maze.hasWall(index, Directions.RIGHT) && <div className="wall wall-right" /> }
               { maze.hasWall(index, Directions.DOWN) && <div className="wall wall-bottom" /> }
               { editMode === EditMods.TREASURE &&
                 <div
                   className="cell-zone"
-                  onClick={ () => { maze.treasure === index ? maze.treasure = null : maze.treasure = index; update(); } }
+                  onClick={ () => { if (isStartCell(index)) return; maze.treasure === index ? maze.treasure = null : maze.treasure = index; update(); } }
+                />
+              }
+              { editMode === EditMods.MINE &&
+                <div
+                  className="cell-zone"
+                  onClick={ () => {
+                    if (isStartCell(index)) {
+                      return;
+                    }
+
+                    const i = maze.mines.indexOf(index);
+
+                    if (i >= 0) {
+                      maze.mines.splice(i, 1);
+                    } else if (maze.mines.length < REQUIRED_MINES) {
+                      maze.mines.push(index);
+                    }
+
+                    update();
+                  } }
+                />
+              }
+              { editMode === EditMods.SUPERMINE &&
+                <div
+                  className="cell-zone"
+                  onClick={ () => { if (isStartCell(index)) return; maze.superMine === index ? maze.superMine = null : maze.superMine = index; update(); } }
                 />
               }
               { editMode === EditMods.WALL &&
@@ -134,6 +184,20 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
           onClick={ () => setEditMode(EditMods.TREASURE) }
         >
           Treasure
+        </button>
+        <button
+          type="button"
+          className={ editMode === EditMods.MINE ? 'active' : undefined }
+          onClick={ () => setEditMode(EditMods.MINE) }
+        >
+          Mine
+        </button>
+        <button
+          type="button"
+          className={ editMode === EditMods.SUPERMINE ? 'active' : undefined }
+          onClick={ () => setEditMode(EditMods.SUPERMINE) }
+        >
+          Supermine
         </button>
       </div>
       <div className="buttons">

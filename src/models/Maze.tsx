@@ -6,6 +6,8 @@ export class Maze {
   horizontalWalls: number[];
   verticalWalls: number[];
   treasure: number | null;
+  mines: number[];
+  superMine: number | null;
 
   constructor(size_x: number, size_y: number) {
     this.sizeX = size_x;
@@ -13,6 +15,8 @@ export class Maze {
     this.horizontalWalls = new Array(size_x * (size_y - 1)).fill(0);
     this.verticalWalls = new Array((size_x - 1) * size_y).fill(0);
     this.treasure = null;
+    this.mines = [];
+    this.superMine = null;
   }
 
   addOrRemoveWall(cellIndex: number, direction: Directions, onlyAddWall: boolean = false): void {

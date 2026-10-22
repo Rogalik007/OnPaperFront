@@ -31,3 +31,30 @@
 .race-player-me {
   box-shadow: 0 0 0 2px var(--ink);
 }
+
+.race-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+
+.race-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.race-legend-me {
+  font-weight: 600;
+}
+
+.race-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

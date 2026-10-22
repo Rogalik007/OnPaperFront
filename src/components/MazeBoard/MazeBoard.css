@@ -42,6 +42,12 @@
   color: var(--error);
 }
 
+.board-layout .mine-alert {
+  margin: 0;
+  font-size: 12px;
+  color: var(--supermine);
+}
+
 /* Стрелочный крестовидный пульт - на телефоне нет физической клавиатуры,
    поэтому это единственный способ ходить */
 .controls {

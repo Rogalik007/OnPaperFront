@@ -7,17 +7,25 @@ export interface WallHit {
   direction: Directions;
 }
 
+export interface MineHit {
+  cell: number;
+  isSuper: boolean;
+}
+
 export interface MazeModel {
   sizeX: number;
   sizeY: number;
   horizontalWalls: number[];
   verticalWalls: number[];
   treasure: number | null;
+  mines: number[];
+  superMine: number | null;
 }
 
 // Ответ GetGameState: с ним экран восстанавливается после перезагрузки страницы
 export interface GameSnapshot {
   size: number[];
+  opponentNickname: string;
   myMaze: MazeModel | null;
   isStarted: boolean;
   myPosition: number;
@@ -25,6 +33,7 @@ export interface GameSnapshot {
   yourTurn: boolean;
   secondsLeft: number;
   discoveredWalls: WallHit[];
+  discoveredMines: MineHit[];
   youWon: boolean | null;
   endedByDisconnect: boolean;
   opponentLeftSeconds: number | null;
@@ -37,6 +46,8 @@ export function toMaze(model: MazeModel): Maze {
   maze.horizontalWalls = model.horizontalWalls;
   maze.verticalWalls = model.verticalWalls;
   maze.treasure = model.treasure;
+  maze.mines = model.mines;
+  maze.superMine = model.superMine;
 
   return maze;
 }

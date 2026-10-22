@@ -10,7 +10,7 @@ interface RaceGridProps {
 
 // Лабиринт пока без стенок, поэтому клеток с двумя игроками быть не должно -
 // сервер расставляет все стартовые точки на разные клетки.
-const PLAYER_COLORS = [
+export const PLAYER_COLORS = [
   '#4d9bff', '#ff8a4d', '#4dff9b', '#ff4d94', '#c94dff',
   '#ffe14d', '#4dfff2', '#ff4d4d', '#9bff4d', '#4d5eff',
 ];
@@ -41,7 +41,7 @@ export default function RaceGrid({ sizeX, sizeY, players, myUserId }: RaceGridPr
                 key={ player.userId }
                 className={ `race-player${ isMe ? ' race-player-me' : '' }` }
                 style={ { background: PLAYER_COLORS[colorIndex % PLAYER_COLORS.length] } }
-                title={ isMe ? 'You' : `Player ${ colorIndex + 1 }` }
+                title={ isMe ? 'You' : player.nickname }
               />
             );
           }) }

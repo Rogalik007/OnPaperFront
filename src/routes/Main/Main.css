@@ -9,6 +9,8 @@
   --wall-bg: #686868;
   --wall: #ffffff;
   --treasure: chartreuse;
+  --mine: #ffcc00;
+  --supermine: #ff3b3b;
   --player: #4d9bff;
   --player-opponent: #ff8a4d;
   --hover: rgba(100, 150, 255, 0.35);

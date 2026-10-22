@@ -1,6 +1,7 @@
 export interface RacePlayerPosition {
   userId: string;
   position: number;
+  nickname: string;
 }
 
 // Ответ GetRaceState: снимок общей комнаты гонки

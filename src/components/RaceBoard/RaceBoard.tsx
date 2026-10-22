@@ -3,7 +3,7 @@ import '../MazeBoard/MazeBoard.css';
 import { RacePlayerPosition } from '../../models/Race.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { Directions } from '../../enums/Directions.tsx';
-import RaceGrid from '../RaceGrid/RaceGrid.tsx';
+import RaceGrid, { PLAYER_COLORS } from '../RaceGrid/RaceGrid.tsx';
 
 interface RaceBoardProps {
   gameId: string;
@@ -79,6 +79,14 @@ export default function RaceBoard({ gameId, sizeX, sizeY, initialPlayers, myUser
     <div className="board-layout">
       <p className="status">Maze Race - { players.length } players</p>
       <RaceGrid sizeX={ sizeX } sizeY={ sizeY } players={ players } myUserId={ myUserId } />
+      <ul className="race-legend">
+        { players.map((player, index) => (
+          <li key={ player.userId } className={ player.userId === myUserId ? 'race-legend-me' : '' }>
+            <span className="race-legend-dot" style={ { background: PLAYER_COLORS[index % PLAYER_COLORS.length] } } />
+            { player.userId === myUserId ? 'You' : player.nickname }
+          </li>
+        )) }
+      </ul>
       <div className="controls">
         <button
           type="button"

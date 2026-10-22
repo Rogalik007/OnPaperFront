@@ -68,6 +68,7 @@ export default function Chat({ gameId, initialMessages }: ChatProps) {
             key={ index }
             className={ message.userId === myUserId ? 'chat-message chat-message-own' : 'chat-message' }
           >
+            <span className="chat-nickname">{ message.userId === myUserId ? 'You' : message.nickname }: </span>
             { message.text }
           </p>
         )) }

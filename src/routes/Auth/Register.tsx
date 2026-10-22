@@ -1,15 +1,13 @@
 import { useState, SubmitEvent } from 'react'
-import { useNavigate, Link } from "react-router";
+import { Link } from "react-router";
 import { API_URL } from '../../../config.js'
-import { saveAuth } from '../../models/Auth.tsx'
 
 function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
-
-  let navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
 
   const handleRegister = async (e: SubmitEvent) => {
     e.preventDefault();
@@ -42,10 +40,9 @@ function Register() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        saveAuth(data.id, data.token);
-        navigate("/");
+        setRegistered(true);
       } else {
         setError(data || "An unknown error occurred. Please try again.");
       }
@@ -54,6 +51,16 @@ function Register() {
       setError("Unable to connect to the server. Please try again later.");
     }
   };
+
+  if (registered) {
+    return (
+      <div className="game-message">
+        <h2>Check your email</h2>
+        <p>We sent a confirmation link to { email }. Please confirm it before logging in.</p>
+        <Link to="/login">Back to login</Link>
+      </div>
+    );
+  }
 
   return (
     <>

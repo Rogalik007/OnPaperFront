@@ -32,7 +32,7 @@ function Home() {
           const data = await response.json();
 
           if (response.ok) {
-            setUser(data.email);
+            setUser(data.email.split('@')[0]);
           }
         } catch (error) {
           console.error('Unable to connect to the server. Please try again later.');
@@ -49,8 +49,8 @@ function Home() {
       return;
     }
 
-    const onGameFound = (gameId: string, opponentId: string) => {
-      console.log(`Game found! Game ID: ${gameId}, Opponent: ${opponentId}`);
+    const onGameFound = (gameId: string, opponentId: string, opponentNickname: string) => {
+      console.log(`Game found! Game ID: ${gameId}, Opponent: ${opponentNickname} (${opponentId})`);
       navigate(`/game/${gameId}`);
     };
 

@@ -10,6 +10,8 @@ interface Draft {
   horizontalWalls: number[];
   verticalWalls: number[];
   treasure: number | null;
+  mines: number[];
+  superMine: number | null;
 }
 
 // Незаконченный лабиринт на сервер не отправляется, поэтому черновик живёт в браузере
@@ -22,6 +24,8 @@ export function saveDraft(gameId: string, maze: Maze): void {
     horizontalWalls: maze.horizontalWalls,
     verticalWalls: maze.verticalWalls,
     treasure: maze.treasure,
+    mines: maze.mines,
+    superMine: maze.superMine,
   };
 
   try {
@@ -66,6 +70,8 @@ export function loadDraft(gameId: string, sizeX: number, sizeY: number): Maze | 
   }
 
   maze.treasure = draft.treasure ?? null;
+  maze.mines = Array.isArray(draft.mines) ? draft.mines : [];
+  maze.superMine = draft.superMine ?? null;
 
   return maze;
 }

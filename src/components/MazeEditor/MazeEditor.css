@@ -108,6 +108,28 @@
   transition: background 0.2s ease;
 }
 
+.mine,
+.supermine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.mine {
+  background-color: var(--mine);
+}
+
+.supermine {
+  background-color: var(--supermine);
+}
+
 .editor .error {
   color: var(--error);
   font-size: 12px;

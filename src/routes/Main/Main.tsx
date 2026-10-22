@@ -6,6 +6,7 @@ import Game from '../Game/Game.tsx'
 import Race from '../Race/Race.tsx'
 import Login from '../Auth/Login.tsx'
 import Register from '../Auth/Register.tsx'
+import ConfirmEmail from '../Auth/ConfirmEmail.tsx'
 import { SignalRProvider } from '../../models/SignalRContext.tsx'
 import './Main.css'
 
@@ -25,6 +26,7 @@ createRoot(rootElement).render(
           <Route path="/race/:gameId" element={<Race />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/confirm-email" element={<ConfirmEmail />} />
         </Routes>
       </BrowserRouter>
     </StrictMode>

@@ -4,7 +4,7 @@ import { Maze } from '../../models/Maze.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { Directions } from '../../enums/Directions.tsx';
 import MazeGrid from '../MazeGrid/MazeGrid.tsx';
-import { WallHit } from '../../models/GameSnapshot.tsx';
+import { MineHit, WallHit } from '../../models/GameSnapshot.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
 
 interface MazeBoardProps {
@@ -15,6 +15,7 @@ interface MazeBoardProps {
   yourTurn: boolean;
   turnSeconds: number;
   discoveredWalls: WallHit[];
+  discoveredMines: MineHit[];
   youWon: boolean | null;
   endedByDisconnect: boolean;
 }
@@ -27,13 +28,21 @@ const KEY_DIRECTIONS: Record<string, Directions> = {
 };
 
 export default function MazeBoard(
-  { gameId, myMaze, position, opponentPosition, yourTurn, turnSeconds, discoveredWalls, youWon,
-    endedByDisconnect }: MazeBoardProps
+  { gameId, myMaze, position, opponentPosition, yourTurn, turnSeconds, discoveredWalls, discoveredMines,
+    youWon, endedByDisconnect }: MazeBoardProps
 ) {
-  // Чужой лабиринт: известны только те стенки, в которые игрок уже упирался
+  // Чужой лабиринт: известны только те стенки, в которые игрок уже упирался,
+  // и мины, на которые он уже наступил
   const [enemyMaze] = useState(() => {
     const maze = new Maze(myMaze.sizeX, myMaze.sizeY);
     discoveredWalls.forEach(wall => maze.addOrRemoveWall(wall.cell, wall.direction, true));
+    discoveredMines.forEach(hit => {
+      if (hit.isSuper) {
+        maze.superMine = hit.cell;
+      } else if (!maze.mines.includes(hit.cell)) {
+        maze.mines.push(hit.cell);
+      }
+    });
     return maze;
   });
   const [cell, setCell] = useState(position);
@@ -43,6 +52,7 @@ export default function MazeBoard(
   const [win, setWin] = useState<boolean | null>(youWon);
   const [byLeave, setByLeave] = useState(endedByDisconnect);
   const [error, setError] = useState<string | null>(null);
+  const [minePenalty, setMinePenalty] = useState<'mine' | 'supermine' | null>(null);
   const [turnNumber, setTurnNumber] = useState(0);
   const { connection } = useSignalR();
   const [, forceUpdate] = useState({});
@@ -53,12 +63,21 @@ export default function MazeBoard(
       return;
     }
 
-    const onMoveResult = (newCell: number, blocked: Directions | null) => {
+    const onMoveResult = (newCell: number, blocked: Directions | null, penalty: 'mine' | 'supermine' | null) => {
       if (blocked !== null) {
         enemyMaze.addOrRemoveWall(newCell, blocked, true);
         forceUpdate({});
       }
 
+      if (penalty === 'mine' && !enemyMaze.mines.includes(newCell)) {
+        enemyMaze.mines.push(newCell);
+        forceUpdate({});
+      } else if (penalty === 'supermine') {
+        enemyMaze.superMine = newCell;
+        forceUpdate({});
+      }
+
+      setMinePenalty(penalty);
       setCell(newCell);
     };
 
@@ -69,6 +88,7 @@ export default function MazeBoard(
       setMyTurn(isMyTurn);
       setSecondsLeft(seconds);
       setError(null);
+      setMinePenalty(null);
       // Перезапускает отсчёт, иначе первая секунда нового хода окажется обрезанной
       setTurnNumber(number => number + 1);
     };
@@ -175,6 +195,11 @@ export default function MazeBoard(
   return (
     <div className="board-layout">
       <p className="status">{ status }</p>
+      { minePenalty && win === null &&
+        <p className="mine-alert">
+          { minePenalty === 'supermine' ? 'Supermine! You lose 2 turns' : 'Mine! You lose a turn' }
+        </p>
+      }
       { error && <p className="error">{ error }</p> }
       <div className="fields">
         <div className="field">

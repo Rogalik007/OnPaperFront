@@ -3,7 +3,7 @@ import './Leaderboard.css';
 import { API_URL } from '../../../config.js';
 
 interface RatingEntry {
-  email: string;
+  nickname: string;
   score: number;
 }
 
@@ -53,9 +53,9 @@ export default function Leaderboard() {
         </thead>
         <tbody>
           { entries.map((entry, index) => (
-            <tr key={ entry.email }>
+            <tr key={ entry.nickname + index }>
               <td>{ index + 1 }</td>
-              <td>{ entry.email }</td>
+              <td>{ entry.nickname }</td>
               <td>{ entry.score }</td>
             </tr>
           )) }

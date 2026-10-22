@@ -41,6 +41,10 @@
   color: var(--paper);
 }
 
+.chat-nickname {
+  font-weight: 600;
+}
+
 .chat-error {
   margin: 0;
 }

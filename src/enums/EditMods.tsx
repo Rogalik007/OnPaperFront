@@ -1,4 +1,6 @@
 export const enum EditMods {
   WALL,
-  TREASURE
+  TREASURE,
+  MINE,
+  SUPERMINE
 }

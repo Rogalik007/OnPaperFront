@@ -17,6 +17,8 @@ export default function MazeGrid({ maze, player = null, opponent = null, showTre
       { Array.from({ length: maze.sizeX * maze.sizeY }, (_, index) => (
         <div id={ String(index) } key={ index } className="grid-cell">
           { showTreasure && maze.treasure === index && <div className="treasure" /> }
+          { maze.mines.includes(index) && <div className="mine">М</div> }
+          { maze.superMine === index && <div className="supermine">С</div> }
           { index === player && <div className="player" /> }
           { index === opponent && <div className="player player-opponent" /> }
           { maze.hasWall(index, Directions.RIGHT) && <div className="wall wall-right" /> }
