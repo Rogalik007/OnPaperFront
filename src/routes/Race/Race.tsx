@@ -15,6 +15,9 @@ function Race() {
   const { gameId } = useParams<RaceRouteParams>();
   const navigate = useNavigate();
   const [snapshot, setSnapshot] = useState<RaceSnapshot | null>(null);
+  // Доска берёт начальное состояние из снимка один раз, поэтому после переподключения
+  // её нужно пересоздать со свежим снимком - для этого меняется key
+  const [syncNumber, setSyncNumber] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { connection } = useSignalR();
@@ -34,6 +37,7 @@ function Race() {
         }
 
         setSnapshot(result);
+        setSyncNumber(n => n + 1);
         setLoading(false);
       })
       .catch(e => {
@@ -65,7 +69,14 @@ function Race() {
     };
   }, [connection, syncRaceState]);
 
-  const handleExit = () => navigate('/');
+  // Выход в меню - это выбывание из гонки: о нём сервер сообщит остальным
+  const handleExit = () => {
+    if (connection && gameId && snapshot) {
+      connection.invoke('LeaveRace', gameId).catch(console.error);
+    }
+
+    navigate('/');
+  };
 
   if (!gameId) {
     return null;
@@ -92,13 +103,7 @@ function Race() {
       <button type="button" className="exit-button" onClick={ handleExit }>
         Exit to menu
       </button>
-      <RaceBoard
-        gameId={ gameId }
-        sizeX={ snapshot.sizeX }
-        sizeY={ snapshot.sizeY }
-        initialPlayers={ snapshot.players }
-        myUserId={ myUserId }
-      />
+      <RaceBoard key={ syncNumber } gameId={ gameId } snapshot={ snapshot } myUserId={ myUserId } />
     </>
   );
 }

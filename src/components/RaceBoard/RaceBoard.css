@@ -1,0 +1,182 @@
+.race-bullets {
+  display: flex;
+  gap: 6px;
+}
+
+/* Переключатель шага и выстрела - в том же виде, что режимы редактора лабиринта */
+.race-mode {
+  display: flex;
+  gap: 12px;
+  width: 200px;
+}
+
+.race-mode button {
+  flex: 1;
+  margin-top: 0;
+}
+
+.race-mode button.active {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.race-mode button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* В режиме выстрела стрелки красные - чтобы не выстрелить вместо шага по ошибке */
+.controls-shoot .control {
+  background: var(--supermine);
+  border-color: var(--supermine);
+  color: var(--paper);
+}
+
+.race-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Вкладки как в браузере: активная сливается с панелью карты под ней,
+   остальные чуть утоплены. При 10 игроках ряд прокручивается вбок пальцем или тачпадом.
+   Линия под вкладками - внутренняя тень, а не border с вылезающими за край вкладками:
+   иначе ряд переполнялся по вертикали и браузер рисовал лишний ползунок */
+.race-tabs {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+  max-width: 380px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  box-shadow: inset 0 -1px 0 var(--line);
+  scrollbar-width: none;
+}
+
+.race-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.race-tabs button.race-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: auto;
+  max-width: 140px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
+  border-bottom-color: var(--line);
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.race-tabs button.race-tab-active {
+  border-color: var(--line);
+  border-bottom-color: var(--paper);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .race-tabs button.race-tab:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+}
+
+.race-tab-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.race-tab-out .race-tab-name {
+  text-decoration: line-through;
+}
+
+/* Кто сейчас ходит */
+.race-tab-turn {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--treasure);
+}
+
+/* На карте этого игрока есть новые ходы, а вкладку ещё не открывали */
+.race-tab-new {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--player-opponent);
+}
+
+.race-tab-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: -16px;
+  padding: 12px 0 16px;
+  border: 1px solid var(--line);
+  border-top: none;
+}
+
+/* Переключатель: вкладки сами следуют за очередью или их листает только сам игрок */
+.race-view-mode {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.race-view-mode button {
+  width: auto;
+  margin: 0;
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+/* Выбранный режим выглядит так же, как выбранный Move / Shoot */
+.race-view-mode button.active {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.race-tab-caption {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.race-log {
+  width: 100%;
+  max-width: 320px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Свежее событие ярче остальных */
+.race-log li:first-child {
+  color: var(--ink);
+}
