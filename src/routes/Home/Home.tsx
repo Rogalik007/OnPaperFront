@@ -5,12 +5,15 @@ import './Home.css';
 import Search from '../../components/Search/Search.tsx';
 import Leaderboard from '../../components/Leaderboard/Leaderboard.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
-import { getToken, getUserId } from '../../models/Auth.tsx';
+import { clearAuth, getToken, getUserId } from '../../models/Auth.tsx';
 
 function Home() {
   const [searching, setSearching] = useState<boolean>(false);
   const [racing, setRacing] = useState<boolean>(false);
   const [user, setUser] = useState<string | null>(null);
+  // Пока ник грузится, не показываем ни Login, ни Logout - иначе вошедший игрок
+  // на долю секунды видит кнопку входа
+  const [authChecked, setAuthChecked] = useState(() => getUserId() === null);
   const { connection } = useSignalR();
   const navigate = useNavigate();
 
@@ -38,6 +41,8 @@ function Home() {
           console.error('Unable to connect to the server. Please try again later.');
         }
       }
+
+      setAuthChecked(true);
     }
 
     fetchUser();
@@ -103,6 +108,19 @@ function Home() {
     navigate('/login');
   };
 
+  const handleLogout = () => {
+    if (searching) {
+      handleCancel();
+    }
+
+    if (racing) {
+      handleRaceCancel();
+    }
+
+    clearAuth();
+    setUser(null);
+  };
+
   const handleCancel = () => {
     setSearching(false);
 
@@ -136,14 +154,20 @@ function Home() {
             <button type="button" onClick={handleRaceSearch} disabled={!connection || searching}>
               { connection ? 'Play Maze Race' : 'Connecting...' }
             </button>
+            <button type="button" onClick={handleLogout}>
+              Logout
+            </button>
           </>
-        ) : null}
-        <button type="button" onClick={handleLogin}>
-          Login
-        </button>
-        <p>
-          No account? <Link to="/register">Sign up</Link>
-        </p>
+        ) : authChecked && (
+          <>
+            <button type="button" onClick={handleLogin}>
+              Login
+            </button>
+            <p>
+              No account? <Link to="/register">Sign up</Link>
+            </p>
+          </>
+        )}
       </div>
       <Leaderboard />
       {searching && <Search handleCancel={ handleCancel } />}
