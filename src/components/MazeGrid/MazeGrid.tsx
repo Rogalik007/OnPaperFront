@@ -1,6 +1,7 @@
 import './MazeGrid.css';
 import { Maze } from '../../models/Maze.tsx';
 import { Directions } from '../../enums/Directions.tsx';
+import { CellItem, PlayerIcon } from '../Icons/Icons.tsx';
 
 interface MazeGridProps {
   maze: Maze;
@@ -14,17 +15,21 @@ interface MazeGridProps {
 export default function MazeGrid({ maze, player = null, opponent = null, showTreasure = false }: MazeGridProps) {
   return (
     <div className="grid" style={ { '--sizeX': maze.sizeX, '--sizeY': maze.sizeY } as React.CSSProperties }>
-      { Array.from({ length: maze.sizeX * maze.sizeY }, (_, index) => (
-        <div id={ String(index) } key={ index } className="grid-cell">
-          { showTreasure && maze.treasure === index && <div className="treasure" /> }
-          { maze.mines.includes(index) && <div className="mine">М</div> }
-          { maze.superMine === index && <div className="supermine">С</div> }
-          { index === player && <div className="player" /> }
-          { index === opponent && <div className="player player-opponent" /> }
-          { maze.hasWall(index, Directions.RIGHT) && <div className="wall wall-right" /> }
-          { maze.hasWall(index, Directions.DOWN) && <div className="wall wall-bottom" /> }
-        </div>
-      )) }
+      { Array.from({ length: maze.sizeX * maze.sizeY }, (_, index) => {
+        const occupied = index === player || index === opponent;
+
+        return (
+          <div id={ String(index) } key={ index } className="grid-cell">
+            { showTreasure && maze.treasure === index && <CellItem kind="treasure" occupied={ occupied } /> }
+            { maze.mines.includes(index) && <CellItem kind="mine" occupied={ occupied } /> }
+            { maze.superMine === index && <CellItem kind="supermine" occupied={ occupied } /> }
+            { index === player && <PlayerIcon className="cell-icon" /> }
+            { index === opponent && <PlayerIcon className="cell-icon icon-opponent" /> }
+            { maze.hasWall(index, Directions.RIGHT) && <div className="wall wall-right" /> }
+            { maze.hasWall(index, Directions.DOWN) && <div className="wall wall-bottom" /> }
+          </div>
+        );
+      }) }
     </div>
   );
 }

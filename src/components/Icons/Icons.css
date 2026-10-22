@@ -1,0 +1,65 @@
+.icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.icon-treasure {
+  color: var(--treasure);
+}
+
+.icon-mine {
+  color: var(--mine);
+}
+
+.icon-supermine {
+  color: var(--supermine);
+}
+
+.icon-player {
+  color: var(--player);
+}
+
+.icon-player.icon-opponent {
+  color: var(--player-opponent);
+}
+
+/* Иконка по центру клетки поля - поверх подкраски клетки и под стенками */
+.cell-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  z-index: 2;
+}
+
+/* Клетка с предметом слегка подкрашена: если на ней стоит игрок, его иконка закрывает
+   иконку предмета, но по цвету клетки всё равно видно, что там клад или мина */
+.cell-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cell-tint-treasure {
+  background: color-mix(in srgb, var(--treasure) 22%, transparent);
+}
+
+.cell-tint-mine {
+  background: color-mix(in srgb, var(--mine) 22%, transparent);
+}
+
+.cell-tint-supermine {
+  background: color-mix(in srgb, var(--supermine) 22%, transparent);
+}
+
+.icon-bullet {
+  color: var(--ink);
+}
+
+.icon-bullet-spent {
+  color: var(--muted);
+}

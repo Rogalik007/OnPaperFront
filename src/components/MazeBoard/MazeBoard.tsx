@@ -88,7 +88,6 @@ export default function MazeBoard(
       setMyTurn(isMyTurn);
       setSecondsLeft(seconds);
       setError(null);
-      setMinePenalty(null);
       // Перезапускает отсчёт, иначе первая секунда нового хода окажется обрезанной
       setTurnNumber(number => number + 1);
     };
@@ -126,6 +125,9 @@ export default function MazeBoard(
 
     setMyTurn(false);
     setError(null);
+    // Предупреждение о мине висит до следующего своего хода: TurnChanged приходит сразу
+    // за MoveResult, и если гасить его там, игрок не успевает его увидеть
+    setMinePenalty(null);
 
     connection.invoke('Move', gameId, direction).catch(e => {
       setError(hubErrorMessage(e));
@@ -194,7 +196,7 @@ export default function MazeBoard(
 
   return (
     <div className="board-layout">
-      <p className="status">{ status }</p>
+      <p className={ win !== null || myTurn ? 'status status-active' : 'status' }>{ status }</p>
       { minePenalty && win === null &&
         <p className="mine-alert">
           { minePenalty === 'supermine' ? 'Supermine! You lose 2 turns' : 'Mine! You lose a turn' }

@@ -8,7 +8,11 @@
 
 .game-message h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .game-message p {
@@ -26,7 +30,7 @@
 }
 
 .return-to-menu {
-  margin: 0;
+  margin: 16px 0 0;
   font-size: 12px;
   color: var(--muted);
   text-align: center;

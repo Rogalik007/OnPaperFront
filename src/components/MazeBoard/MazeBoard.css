@@ -36,6 +36,10 @@
   font-size: 14px;
 }
 
+.board-layout .status-active {
+  color: var(--ink);
+}
+
 .board-layout .error {
   margin: 0;
   font-size: 12px;

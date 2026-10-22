@@ -154,9 +154,9 @@ function Home() {
             <button type="button" onClick={handleRaceSearch} disabled={!connection || searching}>
               { connection ? 'Play Maze Race' : 'Connecting...' }
             </button>
-            <button type="button" onClick={handleLogout}>
-              Logout
-            </button>
+            <p>
+              <button type="button" className="link-button" onClick={handleLogout}>Log out</button>
+            </p>
           </>
         ) : authChecked && (
           <>

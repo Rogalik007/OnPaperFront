@@ -6,6 +6,7 @@ import { Directions } from '../../enums/Directions.tsx';
 import { EditMods } from '../../enums/EditMods.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
 import { clearDraft, loadDraft, saveDraft } from '../../models/MazeDraft.tsx';
+import { CellItem } from '../Icons/Icons.tsx';
 
 const WALL_HIT = 10;
 const REQUIRED_MINES = 2;
@@ -111,9 +112,9 @@ export default function MazeEditor({ gameId, onSaved }: MazeEditorProps) {
               key={ index }
               className="cell"
             >
-              { maze.treasure === index && <div className="treasure" /> }
-              { maze.mines.includes(index) && <div className="mine">М</div> }
-              { maze.superMine === index && <div className="supermine">С</div> }
+              { maze.treasure === index && <CellItem kind="treasure" /> }
+              { maze.mines.includes(index) && <CellItem kind="mine" /> }
+              { maze.superMine === index && <CellItem kind="supermine" /> }
               { maze.hasWall(index, Directions.RIGHT) && <div className="wall wall-right" /> }
               { maze.hasWall(index, Directions.DOWN) && <div className="wall wall-bottom" /> }
               { editMode === EditMods.TREASURE &&

@@ -1,3 +1,5 @@
+/* Ширина задана явно: раньше редактор подстраивался под самый широкий потомок, и кнопки
+   режимов сжимались до ширины поля, а с появлением текста ошибки весь блок прыгал в ширину */
 .editor {
   display: flex;
   flex-direction: column;
@@ -6,6 +8,7 @@
   padding: 0;
   margin: 0;
   border: 0;
+  width: 380px;
   max-width: 100%;
 }
 
@@ -98,41 +101,10 @@
   }
 }
 
-.treasure {
-  position: absolute;
-  background-color: var(--treasure);
-  height: 100%;
-  width: 100%;
-  z-index: 1;
-  pointer-events: none;
-  transition: background 0.2s ease;
-}
-
-.mine,
-.supermine {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--paper);
-}
-
-.mine {
-  background-color: var(--mine);
-}
-
-.supermine {
-  background-color: var(--supermine);
-}
-
 .editor .error {
   color: var(--error);
   font-size: 12px;
+  text-align: center;
 }
 
 /* Переключатель режима рисования и панель действий - два ряда кнопок во всю ширину редактора */
@@ -146,7 +118,9 @@
 .mode-toggle button,
 .buttons button {
   flex: 1;
+  min-width: 0;
   margin-top: 0;
+  padding-inline: 4px;
 }
 
 .mode-toggle button.active {
