@@ -4,6 +4,7 @@ import { Maze } from '../../models/Maze.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { Directions } from '../../enums/Directions.tsx';
 import MazeGrid from '../MazeGrid/MazeGrid.tsx';
+import DirectionPad from '../DirectionPad/DirectionPad.tsx';
 import { MineHit, WallHit } from '../../models/GameSnapshot.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
 
@@ -214,44 +215,7 @@ export default function MazeBoard(
         </div>
       </div>
       { win === null &&
-        <div className="controls">
-          <button
-            type="button"
-            className="control control-up"
-            aria-label="Move up"
-            disabled={ !connection }
-            onClick={ () => move(Directions.UP) }
-          >
-            ↑
-          </button>
-          <button
-            type="button"
-            className="control control-left"
-            aria-label="Move left"
-            disabled={ !connection }
-            onClick={ () => move(Directions.LEFT) }
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            className="control control-down"
-            aria-label="Move down"
-            disabled={ !connection }
-            onClick={ () => move(Directions.DOWN) }
-          >
-            ↓
-          </button>
-          <button
-            type="button"
-            className="control control-right"
-            aria-label="Move right"
-            disabled={ !connection }
-            onClick={ () => move(Directions.RIGHT) }
-          >
-            →
-          </button>
-        </div>
+        <DirectionPad onPress={ move } disabled={ !connection } />
       }
     </div>
   );

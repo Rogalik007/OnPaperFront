@@ -6,7 +6,15 @@
   grid-template-rows: repeat(var(--view), 30px);
   gap: 1px;
   padding: 1px;
-  background: color-mix(in srgb, var(--wall-bg) 40%, var(--paper));
+  background: var(--wall-bg);
+  /* Перетаскивание карты пальцем не должно прокручивать страницу */
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+
+.race-map:active {
+  cursor: grabbing;
 }
 
 .race-map-cell {

@@ -1,20 +1,26 @@
+/* Весь интерфейс - в стиле терминала: моноширинный шрифт, тёмный фон с зелёным оттенком,
+   зелёный «фосфорный» акцент, никаких скруглений. Цвета игры взяты из одной терминальной палитры,
+   чтобы клад, мины и игроки не спорили с интерфейсом */
 :root {
-  --ink: #ededed;
-  --line: #ededed;
-  --paper: #131313;
-  --muted: #767676;
-  --error: #ff6b6b;
+  --ink: #d6e4d9;
+  --paper: #0a0e0b;
+  --muted: #62756a;
+  --line: #2b3b31;
+  --accent: #5af78e;
+  --error: #ff5c57;
 
-  /* Лабиринт: сетка рисуется поверх тёмного фона, поэтому её палитра светлее основной */
-  --wall-bg: #686868;
-  --wall: #ffffff;
-  --treasure: chartreuse;
-  --mine: #ffcc00;
-  --supermine: #ff3b3b;
-  --player: #4d9bff;
-  --player-opponent: #ff8a4d;
-  --hover: rgba(100, 150, 255, 0.35);
-  --hover-strong: rgba(100, 150, 255, 0.6);
+  /* Лабиринт: сетка тусклая, стены яркие */
+  --wall-bg: #24332a;
+  --wall: #d6e4d9;
+  --treasure: #ffd166;
+  --mine: #ff9f43;
+  --supermine: #ff5c57;
+  --player: #57c7ff;
+  --player-opponent: #ff6ac1;
+  --hover: color-mix(in srgb, var(--accent) 22%, transparent);
+  --hover-strong: color-mix(in srgb, var(--accent) 45%, transparent);
+
+  color-scheme: dark;
 }
 
 *,
@@ -42,7 +48,13 @@ body {
   place-items: center;
   background: var(--paper);
   color: var(--ink);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  caret-color: var(--accent);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
 }
 
 #root {
@@ -51,6 +63,8 @@ body {
      чтобы переполнение скроллилось локально внутри самого лабиринта. А раз ширина
      теперь задана явно, а не по контенту, центрирование делаем сами через flex -
      иначе дети просто прижмутся к левому краю вместо центра */
+  position: relative;
+  z-index: 1;
   width: 100%;
   min-width: 0;
   padding-inline: 16px;
@@ -59,27 +73,74 @@ body {
   align-items: center;
 }
 
+/* Кнопка - команда в квадратных скобках: [ PLAY ]. Выбранная или нажатая инвертируется
+   в зелёный, как выделение в терминале. Клавиши пульта, вкладки и кнопки-ссылки
+   оформлены отдельно и скобок не получают */
 button {
   width: 100%;
   padding: 10px 0;
   margin-top: 8px;
   border: 1px solid var(--line);
-  background: var(--ink);
-  color: var(--paper);
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  color: var(--ink);
   font: inherit;
   font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+
+button:not(.dpad-key):not(.race-tab):not(.link-button)::before {
+  content: '[ ';
+  content: '[ ' / '';
+  color: var(--muted);
+}
+
+button:not(.dpad-key):not(.race-tab):not(.link-button)::after {
+  content: ' ]';
+  content: ' ]' / '';
+  color: var(--muted);
 }
 
 /* На тач-устройствах ":hover" срабатывает по тапу и "залипает" до следующего касания -
    кнопка выглядела бы выделенной без наведения. Оставляем hover только там, где есть мышь */
 @media (hover: hover) and (pointer: fine) {
-  button:hover {
-    background: var(--paper);
-    color: var(--ink);
+  button:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
   }
+}
+
+button:active:not(:disabled),
+button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+button:active:not(:disabled)::before,
+button:active:not(:disabled)::after,
+button.active::before,
+button.active::after {
+  color: inherit;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button.active:hover:not(:disabled) {
+    color: var(--paper);
+  }
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 1px dashed var(--accent);
+  outline-offset: 2px;
 }
 
 /* Общая раскладка форм: логин, регистрация и статус на главной делят один и тот же вид */
@@ -88,6 +149,7 @@ form {
   padding: 32px 0;
 }
 
+/* Заголовок - строка приглашения с мигающим курсором: > LOG IN_ */
 h1 {
   font-size: 15px;
   font-weight: 400;
@@ -96,11 +158,43 @@ h1 {
   margin: 0 0 24px;
 }
 
+h1::before,
+h2::before {
+  content: '> ';
+  content: '> ' / '';
+  color: var(--accent);
+}
+
+h1::after {
+  content: '_';
+  content: '_' / '';
+  color: var(--accent);
+  animation: cursor-blink 1.1s steps(1) infinite;
+}
+
+h3::before {
+  content: '# ';
+  content: '# ' / '';
+  color: var(--accent);
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 label {
   display: block;
   font-size: 11px;
   color: var(--muted);
   margin-bottom: 4px;
+  text-transform: lowercase;
+}
+
+label::after {
+  content: ':';
+  content: ':' / '';
 }
 
 input {
@@ -109,6 +203,7 @@ input {
   margin-bottom: 20px;
   border: none;
   border-bottom: 1px solid var(--line);
+  border-radius: 0;
   background: none;
   font: inherit;
   color: var(--ink);
@@ -116,7 +211,7 @@ input {
 
 input:focus {
   outline: none;
-  border-bottom-width: 2px;
+  border-bottom-color: var(--accent);
 }
 
 p {
@@ -131,10 +226,15 @@ p {
   margin: -4px 0 16px;
 }
 
+.error::before {
+  content: '! ';
+  content: '! ' / '';
+}
+
 a {
-  color: var(--ink);
+  color: var(--accent);
   text-decoration: none;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px dashed var(--accent);
 }
 
 /* Действие, которое выглядит как ссылка (например, выход) - тот же вид, что у <a> */
@@ -143,17 +243,28 @@ button.link-button {
   padding: 0;
   margin: 0;
   border: none;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px dashed var(--accent);
   background: none;
-  color: var(--ink);
+  color: var(--accent);
   font-size: inherit;
   letter-spacing: normal;
   text-transform: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  button.link-button:hover {
-    background: none;
-    color: var(--ink);
+  a:hover,
+  button.link-button:hover:not(:disabled) {
+    border-bottom-style: solid;
   }
+}
+
+button.link-button:active:not(:disabled) {
+  background: none;
+  color: var(--accent);
+}
+
+/* Тонкие полосы прокрутки в цвет интерфейса - в чате, в широком лабиринте */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
 }

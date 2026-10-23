@@ -1,3 +1,4 @@
+/* Чат - лог терминала: строки <ник> текст, а поле ввода - командная строка с приглашением */
 .chat {
   width: 100%;
   max-width: 320px;
@@ -6,13 +7,13 @@
   gap: 8px;
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid var(--line);
+  border-top: 1px dashed var(--line);
 }
 
 .chat-messages {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   max-height: 160px;
   overflow-y: auto;
 }
@@ -21,28 +22,26 @@
   margin: 0;
   font-size: 12px;
   color: var(--muted);
-  text-align: center;
+}
+
+.chat-empty::before {
+  content: '// ';
+  content: '// ' / '';
 }
 
 .chat-message {
-  align-self: flex-start;
-  max-width: 80%;
   margin: 0;
-  padding: 6px 10px;
-  border: 1px solid var(--line);
   font-size: 12px;
   color: var(--ink);
   word-break: break-word;
 }
 
-.chat-message-own {
-  align-self: flex-end;
-  background: var(--ink);
-  color: var(--paper);
+.chat-nickname {
+  color: var(--player-opponent);
 }
 
-.chat-nickname {
-  font-weight: 600;
+.chat-message-own .chat-nickname {
+  color: var(--player);
 }
 
 .chat-error {
@@ -51,9 +50,17 @@
 
 .chat-form {
   display: flex;
+  align-items: center;
   gap: 8px;
   width: 100%;
   padding: 0;
+}
+
+.chat-form::before {
+  content: '>';
+  content: '>' / '';
+  color: var(--accent);
+  font-size: 13px;
 }
 
 .chat-form input {
@@ -61,17 +68,12 @@
   width: auto;
   min-width: 0;
   margin: 0;
-  padding: 6px 8px;
-  border: 1px solid var(--line);
+  padding: 6px 0;
   font-size: 12px;
-}
-
-.chat-form input:focus {
-  border-width: 2px;
 }
 
 .chat-form button {
   width: auto;
   margin: 0;
-  padding: 6px 14px;
+  padding: 6px 10px;
 }

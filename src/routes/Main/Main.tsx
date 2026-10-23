@@ -8,6 +8,7 @@ import Login from '../Auth/Login.tsx'
 import Register from '../Auth/Register.tsx'
 import ConfirmEmail from '../Auth/ConfirmEmail.tsx'
 import { SignalRProvider } from '../../models/SignalRContext.tsx'
+import Backdrop from '../../components/Backdrop/Backdrop.tsx'
 import './Main.css'
 
 const rootElement = document.getElementById('root')
@@ -19,6 +20,7 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <SignalRProvider>
     <StrictMode>
+      <Backdrop />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />

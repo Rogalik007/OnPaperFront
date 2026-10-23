@@ -107,28 +107,20 @@
   text-align: center;
 }
 
-/* Переключатель режима рисования и панель действий - два ряда кнопок во всю ширину редактора */
+/* Переключатель режима рисования и панель действий во всю ширину редактора.
+   Режимы - сеткой 2x2: четыре «[ SUPERMINE ]» в одну строку не помещаются даже на ПК */
 .mode-toggle,
 .buttons {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
   width: 100%;
 }
 
 .mode-toggle button,
 .buttons button {
-  flex: 1;
   min-width: 0;
   margin-top: 0;
   padding-inline: 4px;
-}
-
-.mode-toggle button.active {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.buttons button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  white-space: nowrap;
 }

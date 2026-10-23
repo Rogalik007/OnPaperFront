@@ -1,9 +1,11 @@
+/* Окно поиска - как окно терминала: строка заголовка и текстовый спиннер */
 .modal {
-  width: 240px;
+  width: 260px;
   padding: 24px;
   text-align: center;
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .modal h3 {
@@ -14,26 +16,48 @@
   margin: 0 0 20px;
 }
 
+/* Классический спиннер терминала: | / - \ по кругу */
 .spinner {
-  width: 20px;
   height: 20px;
-  margin: 0 auto;
-  border: 2px solid var(--muted);
-  border-top-color: var(--ink);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  margin: 0 auto 8px;
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.spinner::after {
+  content: '|';
+  content: '|' / '';
+  animation: spinner-frames 0.6s steps(1) infinite;
 }
 
 .overlay {
   position: fixed;
   inset: 0;
+  z-index: 10;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.6);
+  padding: 16px;
+  background: rgb(0 0 0 / 0.7);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@keyframes spinner-frames {
+  0% {
+    content: '|';
+    content: '|' / '';
+  }
+
+  25% {
+    content: '/';
+    content: '/' / '';
+  }
+
+  50% {
+    content: '-';
+    content: '-' / '';
+  }
+
+  75% {
+    content: '\\';
+    content: '\\' / '';
   }
 }

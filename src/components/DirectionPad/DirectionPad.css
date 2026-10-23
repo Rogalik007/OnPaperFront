@@ -1,0 +1,78 @@
+.dpad {
+  --key: var(--accent);
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 6px;
+  touch-action: manipulation;
+}
+
+.dpad-danger {
+  --key: var(--supermine);
+}
+
+/* Клавиша - квадрат в рамке, как остальные кнопки; при нажатии инвертируется в цвет пульта */
+.dpad button.dpad-key {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--key) 40%, var(--paper));
+  background: color-mix(in srgb, var(--key) 6%, var(--paper));
+  color: var(--key);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-key svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dpad button.dpad-key:hover:not(:disabled) {
+    border-color: var(--key);
+    color: var(--key);
+  }
+}
+
+/* :active срабатывает и от тача, и от мыши и само гаснет при отпускании - без залипания на телефоне */
+.dpad button.dpad-key:active:not(:disabled) {
+  background: var(--key);
+  border-color: var(--key);
+  color: var(--paper);
+}
+
+.dpad-up {
+  grid-area: 1 / 2;
+}
+
+.dpad-left {
+  grid-area: 2 / 1;
+}
+
+.dpad-right {
+  grid-area: 2 / 3;
+}
+
+.dpad-down {
+  grid-area: 3 / 2;
+}
+
+/* Центр креста - мигающий курсор: пульт читается как одно целое */
+.dpad-hub {
+  grid-area: 2 / 2;
+  align-self: center;
+  justify-self: center;
+  width: 10px;
+  height: 16px;
+  background: var(--key);
+  opacity: 0.7;
+  animation: cursor-blink 1.1s steps(1) infinite;
+}

@@ -3,7 +3,8 @@
   gap: 6px;
 }
 
-/* Переключатель шага и выстрела - в том же виде, что режимы редактора лабиринта */
+/* Переключатель шага и выстрела - в том же виде, что режимы редактора лабиринта;
+   выбранный режим подсвечивает общий стиль button.active */
 .race-mode {
   display: flex;
   gap: 12px;
@@ -13,23 +14,6 @@
 .race-mode button {
   flex: 1;
   margin-top: 0;
-}
-
-.race-mode button.active {
-  background: var(--paper);
-  color: var(--ink);
-}
-
-.race-mode button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* В режиме выстрела стрелки красные - чтобы не выстрелить вместо шага по ошибке */
-.controls-shoot .control {
-  background: var(--supermine);
-  border-color: var(--supermine);
-  color: var(--paper);
 }
 
 .race-hint {
@@ -68,10 +52,8 @@
   max-width: 140px;
   margin: 0;
   padding: 7px 10px;
-  border: 1px solid color-mix(in srgb, var(--line) 35%, transparent);
-  border-bottom-color: var(--line);
-  border-radius: 6px 6px 0 0;
-  background: color-mix(in srgb, var(--ink) 6%, var(--paper));
+  border: 1px solid var(--line);
+  background: var(--paper);
   color: var(--muted);
   font-size: 11px;
   letter-spacing: normal;
@@ -79,16 +61,15 @@
 }
 
 .race-tabs button.race-tab-active {
-  border-color: var(--line);
+  border-color: var(--accent);
   border-bottom-color: var(--paper);
-  background: var(--paper);
-  color: var(--ink);
+  color: var(--accent);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .race-tabs button.race-tab:hover {
-    background: var(--paper);
-    color: var(--ink);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 }
 
@@ -107,8 +88,8 @@
   width: 6px;
   height: 6px;
   flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--treasure);
+  background: var(--accent);
+  animation: cursor-blink 1.1s steps(1) infinite;
 }
 
 /* На карте этого игрока есть новые ходы, а вкладку ещё не открывали */
@@ -118,11 +99,11 @@
   right: 3px;
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background: var(--player-opponent);
 }
 
 .race-tab-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -151,10 +132,16 @@
   font-size: 11px;
 }
 
-/* Выбранный режим выглядит так же, как выбранный Move / Shoot */
-.race-view-mode button.active {
-  background: var(--paper);
-  color: var(--ink);
+
+/* Вернуть сдвинутую карту к игроку. Висит в углу панели, чтобы не сдвигать карту по высоте */
+.race-tab-panel button.race-recenter {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: auto;
+  margin: 0;
+  padding: 3px 6px;
+  font-size: 10px;
 }
 
 .race-tab-caption {

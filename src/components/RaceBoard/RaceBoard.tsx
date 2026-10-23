@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import '../MazeBoard/MazeBoard.css';
 import './RaceBoard.css';
-import { RacePlayerView, RaceSnapshot, RaceWall, RaceWinReason } from '../../models/Race.tsx';
+import { RaceCell, RacePlayerView, RaceSnapshot, RaceWall, RaceWinReason } from '../../models/Race.tsx';
 import { useSignalR } from '../../models/SignalRContext.tsx';
 import { hubErrorMessage } from '../../models/HubError.tsx';
 import { Directions } from '../../enums/Directions.tsx';
 import RaceMap from '../RaceMap/RaceMap.tsx';
+import DirectionPad from '../DirectionPad/DirectionPad.tsx';
 import { BulletIcon, PlayerIcon } from '../Icons/Icons.tsx';
 
 interface RaceBoardProps {
@@ -28,8 +29,8 @@ const MAX_BULLETS = 3;
 
 // Цвет игрока - по его месту в очереди ходов, одинаковый у всех участников
 const PLAYER_COLORS = [
-  '#4d9bff', '#ff8a4d', '#4dff9b', '#ff4d94', '#c94dff',
-  '#ffe14d', '#4dfff2', '#ff4d4d', '#9bff4d', '#4d5eff',
+  '#57c7ff', '#ff6ac1', '#5af78e', '#ff9f43', '#c792ea',
+  '#f3f99d', '#9aedfe', '#ff5c57', '#b8e986', '#7aa2f7',
 ];
 const MAX_LOG = 6;
 
@@ -62,6 +63,8 @@ export default function RaceBoard({ gameId, snapshot, myUserId }: RaceBoardProps
   const [viewMode, setViewMode] = useState<ViewMode>(loadViewMode);
   const [selected, setSelected] = useState(() =>
     (viewMode === 'auto' && snapshot.winner === null ? snapshot.turn : myUserId) ?? snapshot.players[0]?.userId);
+  // Насколько сдвинута карта на каждой вкладке - у каждой своё, и сдвиг переживает переключение вкладок
+  const [offsets, setOffsets] = useState<Record<string, RaceCell>>({});
   // Вкладки, где карта поменялась, а их ещё не открывали
   const [unseen, setUnseen] = useState<Set<string>>(new Set());
   const selectedRef = useRef(selected);
@@ -328,6 +331,8 @@ export default function RaceBoard({ gameId, snapshot, myUserId }: RaceBoardProps
 
   const selectedIndex = Math.max(0, players.findIndex(p => p.userId === selected));
   const selectedView = players[selectedIndex];
+  const selectedOffset = offsets[selectedView?.userId] ?? { x: 0, y: 0 };
+  const panSelected = (offset: RaceCell) => setOffsets(prev => ({ ...prev, [selectedView.userId]: offset }));
   let caption = '';
 
   if (selectedView) {
@@ -387,10 +392,17 @@ export default function RaceBoard({ gameId, snapshot, myUserId }: RaceBoardProps
       { selectedView &&
         <div className="race-tab-panel" role="tabpanel">
           <p className="race-tab-caption">{ caption }</p>
+          { (selectedOffset.x !== 0 || selectedOffset.y !== 0) &&
+            <button type="button" className="race-recenter" onClick={ () => panSelected({ x: 0, y: 0 }) }>
+              Center
+            </button>
+          }
           <RaceMap
             view={ selectedView }
             color={ PLAYER_COLORS[selectedIndex % PLAYER_COLORS.length] }
             showTreasure={ isOver }
+            offset={ selectedOffset }
+            onPan={ panSelected }
           />
         </div>
       }
@@ -412,13 +424,8 @@ export default function RaceBoard({ gameId, snapshot, myUserId }: RaceBoardProps
               Shoot
             </button>
           </div>
-          <div className={ `controls${ mode === 'shoot' ? ' controls-shoot' : '' }` }>
-            <button type="button" className="control control-up" aria-label="Up" onClick={ () => act(Directions.UP) }>↑</button>
-            <button type="button" className="control control-left" aria-label="Left" onClick={ () => act(Directions.LEFT) }>←</button>
-            <button type="button" className="control control-down" aria-label="Down" onClick={ () => act(Directions.DOWN) }>↓</button>
-            <button type="button" className="control control-right" aria-label="Right" onClick={ () => act(Directions.RIGHT) }>→</button>
-          </div>
-          <p className="race-hint">Arrows - { mode === 'shoot' ? 'shoot' : 'move' }, Space - switch move / shoot</p>
+          <DirectionPad onPress={ act } danger={ mode === 'shoot' } />
+          <p className="race-hint">Arrows - { mode === 'shoot' ? 'shoot' : 'move' }, Space - switch move / shoot. Drag the map to look around</p>
         </>
       }
       { returnSeconds !== null && <p className="race-hint">Returning to menu in { returnSeconds }s...</p> }

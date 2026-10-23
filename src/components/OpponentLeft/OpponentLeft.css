@@ -5,5 +5,9 @@
   text-align: center;
   color: var(--error);
   border: 1px solid var(--error);
-  border-radius: 6px;
+}
+
+.opponent-left::before {
+  content: '! ';
+  content: '! ' / '';
 }
