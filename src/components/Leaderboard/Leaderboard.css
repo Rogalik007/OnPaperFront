@@ -1,8 +1,15 @@
+/* Рядом с меню (на широком экране) таблица выровнена по его заголовку;
+   под меню (на телефоне) отделена пунктиром */
 .leaderboard {
   width: 280px;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line);
+  padding: 32px 0;
+}
+
+@media (max-width: 655px) {
+  .leaderboard {
+    padding-top: 24px;
+    border-top: 1px dashed var(--line);
+  }
 }
 
 .leaderboard h3 {

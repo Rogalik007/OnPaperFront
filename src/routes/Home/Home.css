@@ -1,3 +1,12 @@
+/* Слева меню с кнопками игр, справа таблица лидеров. На узком экране - друг под другом */
+.home-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  column-gap: 64px;
+}
+
 .home {
   width: 280px;
   padding: 32px 0;

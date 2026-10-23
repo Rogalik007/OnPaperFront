@@ -142,17 +142,17 @@ function Home() {
   };
 
   return (
-    <>
+    <div className="home-layout">
       <div className="home">
         <h1>On Paper</h1>
         {user ? (
           <>
             <p className="username">Signed in as {user}</p>
             <button type="button" onClick={handleSearch} disabled={!connection || racing}>
-              { connection ? 'Play' : 'Connecting...' }
+              { connection ? 'Treasure: 2 Players' : 'Connecting...' }
             </button>
             <button type="button" onClick={handleRaceSearch} disabled={!connection || searching}>
-              { connection ? 'Play Maze Race' : 'Connecting...' }
+              { connection ? 'Treasure' : 'Connecting...' }
             </button>
             <p>
               <button type="button" className="link-button" onClick={handleLogout}>Log out</button>
@@ -170,14 +170,14 @@ function Home() {
         )}
       </div>
       <Leaderboard />
-      {searching && <Search handleCancel={ handleCancel } />}
+      {searching && <Search handleCancel={ handleCancel } message="Searching for an opponent..." />}
       {racing && (
         <Search
           handleCancel={ handleRaceCancel }
-          message="Searching for maze race players..."
+          message="Searching for players..."
         />
       )}
-    </>
+    </div>
   );
 }
 
